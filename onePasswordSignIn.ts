@@ -14,19 +14,19 @@ if (!ANTHROPIC_API_KEY || !EXTENSION_PATH || !USER_DATA_DIR || !EMAIL || !SECRET
   process.exit(1);
 }
 
-(async () => {
+export async function extensionSignIn(): Promise<Stagehand> {
   // Initialize Stagehand locally
   const stagehand = new Stagehand({
     env: 'LOCAL',
     modelName: 'anthropic/claude-3-5-sonnet-20240620',
-    modelClientOptions: { apiKey: ANTHROPIC_API_KEY },
+    modelClientOptions: { apiKey: ANTHROPIC_API_KEY! },
     localBrowserLaunchOptions: {
       headless: false,
       args: [
-        `--disable-extensions-except=${EXTENSION_PATH}`,
-        `--load-extension=${EXTENSION_PATH}`
+        `--disable-extensions-except=${EXTENSION_PATH!}`,
+        `--load-extension=${EXTENSION_PATH!}`
       ],
-      userDataDir: USER_DATA_DIR,
+      userDataDir: USER_DATA_DIR!,
     },
   });
 
@@ -34,7 +34,7 @@ if (!ANTHROPIC_API_KEY || !EXTENSION_PATH || !USER_DATA_DIR || !EMAIL || !SECRET
   const page = stagehand.page;
 
   // Derive extension ID by scanning the user profile's Local Extension Settings folder
-  const settingsDir = path.join(USER_DATA_DIR, 'Default', 'Local Extension Settings');
+  const settingsDir = path.join(USER_DATA_DIR!, 'Default', 'Local Extension Settings');
   let extensionId: string;
   try {
     const ids = fs.readdirSync(settingsDir).filter(name =>
@@ -61,23 +61,21 @@ if (!ANTHROPIC_API_KEY || !EXTENSION_PATH || !USER_DATA_DIR || !EMAIL || !SECRET
   await page.waitForLoadState('networkidle');
 
   // 3) Enter email
-  await page.act(`Type "${EMAIL}" into the Email field`);
+  await page.act(`Type "${EMAIL!}" into the Email field`);
 
   // 4) Click Continue
   await page.act('Click the Continue button');
   await page.waitForLoadState('networkidle');
 
   // 5) Enter Secret Key
-  await page.act(`Type "${SECRET_KEY}" into the Secret Key field`);
+  await page.act(`Type "${SECRET_KEY!}" into the Secret Key field`);
 
   // 6) Enter Master Password
-  await page.act(`Type "${MASTER_PASSWORD}" into the Password field`);
+  await page.act(`Type "${MASTER_PASSWORD!}" into the Password field`);
 
   // 7) Click Sign In
   await page.act('Click the Sign In button');
   await page.waitForTimeout(2000);
 
-  console.log('✅ 1Password extension is now authenticated');
-
-  await stagehand.close();
-})(); 
+  return stagehand;
+} 
