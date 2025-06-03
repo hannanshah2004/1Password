@@ -1,5 +1,6 @@
 import { Stagehand } from '@browserbasehq/stagehand';
 import 'dotenv/config';
+import { z } from 'zod';
 
 const { SEARCH_INPUT } = process.env;
 if (!SEARCH_INPUT) {
@@ -10,24 +11,32 @@ if (!SEARCH_INPUT) {
 export async function fetchCredentials(stagehand: Stagehand): Promise<{ username: string; password: string }> {
   const page = stagehand.page;
 
-  // Open the 1Password extension via keyboard shortcut
-  await page.act('Press Ctrl+Shift+X to open the 1Password extension');
+  await page.goto('https://www.google.com/');
   await page.waitForLoadState('networkidle');
 
-  // Focus the Search field and type the search term
+  // 1) Click the Extensions toolbar icon
+  await page.act('Click the Extensions toolbar icon');
+  await page.waitForLoadState('networkidle');
+
+  // 2) Click the 1Password extension entry in the dropdown
+  await page.act('Click the 1Password extension in the Extensions dropdown');
+  await page.waitForLoadState('networkidle');
+
+  // 3) Focus the Search field and type the search term
   await page.act('Click the Search 1Password field');
   await page.act(`Type "${SEARCH_INPUT}" into the Search 1Password field`);
   await page.waitForLoadState('networkidle');
 
-  // Copy the username
-  await page.act('Hover over the username field');
-  await page.act('Click the Copy button next to the username');
-  const username = await page.evaluate(() => navigator.clipboard.readText());
+  // 4) Click the matching item in search results
+  await page.act(`Click the "${SEARCH_INPUT}" item in the search results`);
+  await page.waitForLoadState('networkidle');
 
-  // Copy the password
-  await page.act('Hover over the password field');
-  await page.act('Click the Copy button next to the password');
-  const password = await page.evaluate(() => navigator.clipboard.readText());
+  // Extract username and password from the opened item
+  const credsSchema = z.object({ username: z.string(), password: z.string() });
+  const { username, password } = await page.extract({
+    instruction: 'Extract the username and password fields from the current 1Password item',
+    schema: credsSchema,
+  });
 
   return { username, password };
 }
