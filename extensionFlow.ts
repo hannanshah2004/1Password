@@ -1,7 +1,5 @@
 import { Stagehand } from '@browserbasehq/stagehand';
 import dotenv from 'dotenv';
-import fs from 'fs';
-import path from 'path';
 
 // Load environment variables
 dotenv.config();
@@ -35,22 +33,12 @@ if (!ANTHROPIC_API_KEY || !EXTENSION_PATH || !USER_DATA_DIR) {
   const page = stagehand.page;
   const context = page.context();
 
-  // Derive the extension ID from the userDataDir Extensions folder
-  const extensionsDir = path.join(USER_DATA_DIR, 'Default', 'Extensions');
-  let extIds: string[] = [];
-  try {
-    extIds = fs.readdirSync(extensionsDir).filter(name => fs.statSync(path.join(extensionsDir, name)).isDirectory());
-  } catch (e) {
-    console.error(`Failed to read extensions directory at ${extensionsDir}`, e);
-    process.exit(1);
-  }
-  if (extIds.length === 0) {
-    console.error('No extensions found in user data directory');
-    process.exit(1);
-  }
-  const extensionId = extIds[0];
+  // Wait for the extension's service worker to register, then derive its ID
+  const worker = await context.waitForEvent('serviceworker');
+  const extensionUrl = worker.url(); // e.g. chrome-extension://<ID>/background/background.js
+  const extensionId = new URL(extensionUrl).hostname;
 
-  // Open the 1Password popup UI in a new tab (so you can sign in manually)
+  // Open the 1Password popup UI in a new tab
   const extPage = await context.newPage();
   const popupPath = 'popup/index.html';
   const popupUrl = `chrome-extension://${extensionId}/${popupPath}`;
