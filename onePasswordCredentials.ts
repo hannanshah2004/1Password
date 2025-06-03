@@ -14,6 +14,12 @@ export async function fetchCredentials(stagehand: Stagehand): Promise<{ username
   await page.goto('https://my.1password.com/app#/everything/AllItems');
   await page.waitForLoadState('networkidle');
 
+  // Grant clipboard permissions so we can read without a prompt
+  await page.context().grantPermissions([
+    'clipboard-read',
+    'clipboard-write'
+  ], { origin: 'https://my.1password.com' });
+
   // 0) If prompted, log in with the master password
   await page.act('Click the Password field');
   await page.act(`Type "${MASTER_PASSWORD}" into the Password field`);
