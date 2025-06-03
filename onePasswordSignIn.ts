@@ -5,7 +5,7 @@ import path from 'path';
 import os from 'os';
 
 dotenv.config();
-const { ANTHROPIC_API_KEY, EXTENSION_PATH, /* USER_DATA_DIR, */ EMAIL, SECRET_KEY, MASTER_PASSWORD } = process.env;
+const { ANTHROPIC_API_KEY, EXTENSION_PATH, /* USER_DATA_DIR, */ EMAIL, SECRET_KEY, MASTER_PASSWORD, BROWSER_PROXY_SERVER, BROWSER_PROXY_USERNAME, BROWSER_PROXY_PASSWORD } = process.env;
 
 if (!ANTHROPIC_API_KEY || !EXTENSION_PATH || !EMAIL || !SECRET_KEY || !MASTER_PASSWORD) {
   console.error(
@@ -21,11 +21,12 @@ console.log('Using Chrome profile:', profileDir);
 export async function extensionSignIn(): Promise<Stagehand> {
   const stagehand = new Stagehand({
     env: 'LOCAL',
-    modelName: 'anthropic/claude-3-7-sonnet-latest',
+    modelName: 'anthropic/claude-3-5-sonnet-20240620',
     modelClientOptions: { apiKey: ANTHROPIC_API_KEY! },
     localBrowserLaunchOptions: {
       headless: false,
       args: [
+        '--disable-blink-features=AutomationControlled',
         `--disable-extensions-except=${EXTENSION_PATH!}`,
         `--load-extension=${EXTENSION_PATH!}`
       ],
