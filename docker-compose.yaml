@@ -1,0 +1,29 @@
+services:
+  connect-api:
+    image: 1password/connect-api:latest
+    container_name: connect-api
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount the credentials JSON where Connect API expects it
+      - ./1password-credentials.json:/home/opuser/.op/1password-credentials.json:ro
+      # Persist database files
+      - data:/home/opuser/.op/data
+
+  connect-sync:
+    image: 1password/connect-sync:latest
+    container_name: connect-sync
+    depends_on:
+      - connect-api
+    # Use internal network to reach the API service
+    environment:
+      - CONNECT_SERVER_URL=http://connect-api:8080
+    volumes:
+      # Use same credentials mount for sync
+      - ./1password-credentials.json:/home/opuser/.op/1password-credentials.json:ro
+      # Use same data volume
+      - data:/home/opuser/.op/data
+
+# Optional volume for sync persistence (if desired)
+volumes:
+  data: {}
