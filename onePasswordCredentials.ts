@@ -11,23 +11,16 @@ if (!SEARCH_INPUT) {
 export async function fetchCredentials(stagehand: Stagehand): Promise<{ username: string; password: string }> {
   const page = stagehand.page;
 
-  await page.goto('https://www.google.com/');
+  // Navigate to 1Password web vault
+  await page.goto('https://my.1password.com/app#/everything/AllItems');
   await page.waitForLoadState('networkidle');
 
-  // 1) Click the Extensions toolbar icon
-  await page.act('Click the Extensions toolbar icon');
+  // 1) Click the 'Search in all vaults' field and type the search term
+  await page.act('Click the Search in all vaults field');
+  await page.act(`Type "${SEARCH_INPUT}" into the Search in all vaults field`);
   await page.waitForLoadState('networkidle');
 
-  // 2) Click the 1Password extension entry in the dropdown
-  await page.act('Click the 1Password extension in the Extensions dropdown');
-  await page.waitForLoadState('networkidle');
-
-  // 3) Focus the Search field and type the search term
-  await page.act('Click the Search 1Password field');
-  await page.act(`Type "${SEARCH_INPUT}" into the Search 1Password field`);
-  await page.waitForLoadState('networkidle');
-
-  // 4) Click the matching item in search results
+  // 2) Click the matching item in the results
   await page.act(`Click the "${SEARCH_INPUT}" item in the search results`);
   await page.waitForLoadState('networkidle');
 
