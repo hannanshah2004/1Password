@@ -15,10 +15,9 @@ if (!ANTHROPIC_API_KEY || !EXTENSION_PATH || !USER_DATA_DIR || !EMAIL || !SECRET
 }
 
 export async function extensionSignIn(): Promise<Stagehand> {
-  // Initialize Stagehand locally
   const stagehand = new Stagehand({
     env: 'LOCAL',
-    modelName: 'anthropic/claude-3-5-sonnet-20240620',
+    modelName: 'anthropic/claude-3-7-sonnet-latest',
     modelClientOptions: { apiKey: ANTHROPIC_API_KEY! },
     localBrowserLaunchOptions: {
       headless: false,
