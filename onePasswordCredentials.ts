@@ -2,9 +2,9 @@ import { Stagehand } from '@browserbasehq/stagehand';
 import 'dotenv/config';
 import { z } from 'zod';
 
-const { SEARCH_INPUT } = process.env;
-if (!SEARCH_INPUT) {
-  console.error('Error: SEARCH_INPUT environment variable must be set');
+const { SEARCH_INPUT, MASTER_PASSWORD } = process.env;
+if (!SEARCH_INPUT || !MASTER_PASSWORD) {
+  console.error('Error: SEARCH_INPUT and MASTER_PASSWORD environment variables must be set');
   process.exit(1);
 }
 
@@ -13,6 +13,12 @@ export async function fetchCredentials(stagehand: Stagehand): Promise<{ username
 
   // Navigate to 1Password web vault
   await page.goto('https://my.1password.com/app#/everything/AllItems');
+  await page.waitForLoadState('networkidle');
+
+  // 0) If prompted, log in with the master password
+  await page.act('Click the Password field');
+  await page.act(`Type "${MASTER_PASSWORD}" into the Password field`);
+  await page.act('Click the Sign In button');
   await page.waitForLoadState('networkidle');
 
   // 1) Click the 'Search in all vaults' field and type the search term
