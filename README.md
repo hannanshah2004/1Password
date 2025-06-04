@@ -1,4 +1,4 @@
-# Stagehand 1Password Spotify Automation
+# Stagehand <-> 1Password Automation
 
 This project uses Stagehand to automate:
 - Downloading 1Password Extension (`onePasswordSignIn.ts`).
