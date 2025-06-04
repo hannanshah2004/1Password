@@ -27,6 +27,9 @@ export async function extensionSignIn(): Promise<Stagehand> {
       headless: false,
       args: [
         '--disable-blink-features=AutomationControlled',
+        '--no-first-run',
+        '--disable-first-run-ui',
+        '--no-default-browser-check',
         `--disable-extensions-except=${EXTENSION_PATH!}`,
         `--load-extension=${EXTENSION_PATH!}`
       ],
@@ -35,6 +38,13 @@ export async function extensionSignIn(): Promise<Stagehand> {
   });
 
   await stagehand.init();
+  // Purge any Chrome tabs that opened automatically (new tab or welcome page)
+  const context = stagehand.context;
+  for (const p of context.pages()) {
+    await p.close();
+  }
+  // Open a clean tab and set it as the active Stagehand page
+  await context.newPage();
   const page = stagehand.page;
 
 
